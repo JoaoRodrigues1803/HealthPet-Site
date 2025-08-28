@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Meu Site Conectado à API</title>
+</head>
+<body>
+  <h1>Dados do Banco</h1>
+  <button onclick="buscarDados()">Buscar</button>
+  <button onclick="buscarUsuarios()">Buscar</button>
+  <ul id="lista"></ul>
+
+
+  <script>
+    async function buscarDados() {
+      try {
+        // Troque pela URL da sua API hospedada na Render
+        const resposta = await fetch("https://api-vercel-9g3o.onrender.com/dados");  
+        const dados = await resposta.json();
+
+        const lista = document.getElementById("lista");
+        lista.innerHTML = "";
+
+        dados.forEach(item => {
+          const li = document.createElement("li");
+          li.textContent = JSON.stringify(item);
+          lista.appendChild(li);
+        });
+      } catch (erro) {
+        console.error("Erro ao buscar dados:", erro);
+      }
+    }
+    async function buscarUsuarios() {
+      try {
+        // Troque pela URL da sua API hospedada na Render
+        const response = await fetch("https://api-vercel-9g3o.onrender.com/usuario");  
+        const usuarios = await response.json();
+
+        const lista = document.getElementById("lista");
+        lista.innerHTML = "";
+
+        usuarios.forEach(item => {
+          const li = document.createElement("li");
+          li.textContent = JSON.stringify(item);
+          lista.appendChild(li);
+        });
+      } catch (erro) {
+        console.error("Erro ao buscar usuarios:", erro);
+      }
+    }
+  </script>
+</body>
+</html>
