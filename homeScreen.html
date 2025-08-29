@@ -1,31 +1,64 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Health</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Health</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <div class="navbar">
-        <a href="homeScreen.html">Home</a>
-        <a href="Login.html">Login</a>
-        <a href="about.html">Sobre</a>
-    </div>
-    <div class="top-bar">
-        <h3>Health Pet</h3>
-    </div>
+
+  <div class="top-bar">
+    <h3>Health Pet</h3>
+  </div>
+
+  <div class="container">
     <div class="heart-rate-container">
-        <div class="heart-rate-circle">
-            <span id="heart-rate-value">--</span>
-            <span class="bpm-label">BPM</span>
-        </div>
-        <p>Batimentos Cardíacos</p>
+      <div class="heart-rate-circle">
+        <span id="heart-rate-value">--</span>
+        <span class="bpm-label">BPM</span>
+      </div>
+      <p><strong>Batimentos Cardíacos</strong></p>
     </div>
-    <script>
-        // Exemplo de como atualizar o valor futuramente
-        // document.getElementById('heart-rate-value').textContent = 72;
-    </script>
-    
+<br><br><br><br><br>
+    <div class="maps">
+      <h3>Vamos ver onde seu pet está</h3>
+      <div class="map-wrapper">
+        <iframe
+          id="map"
+          style="border: 0;"
+          allowfullscreen=""
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+        ></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navbar no rodapé -->
+  <div class="navbar">
+    <a href="homeScreen.html">Monitor</a>
+    <a href="agenda.html">Agenda</a>
+    <a href="blog.html">Blog</a>
+  </div>
+
+  <script>
+    // Exemplo para simular valor de BPM futuramente
+    // document.getElementById('heart-rate-value').textContent = 72;
+  </script>
+   <script>
+    async function carregarMapa() {
+    // Teste com valores fixos
+    const lat = -23.105454851125238;
+    const lng = -47.70891389442661;
+
+    const url = `https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed`;
+    document.getElementById("map").src = url;
+    }
+
+    carregarMapa();
+  </script>
+
+  </script>
 </body>
 </html>
