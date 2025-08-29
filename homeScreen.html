@@ -39,7 +39,7 @@
   <div class="navbar">
     <a href="homeScreen.html">Monitor</a>
     <a href="agenda.html">Agenda</a>
-    <a href="blog.html">Blog</a>
+    <a href="blog/html.html">Blog</a>
   </div>
 
   <script>
@@ -58,7 +58,18 @@
 
     carregarMapa();
   </script>
-
-  </script>
+<script>
+  fetch('https://tcc-api-e2y4.onrender.com')
+    .then(response => response.json())
+    .then(data => {
+      // Exemplo: exibe o resultado no console
+      console.log(data);
+      // Se quiser mostrar algum valor na tela, por exemplo:
+      // document.getElementById('heart-rate-value').textContent = data.bpm || '--';
+    })
+    .catch(error => {
+      console.error('Erro ao consultar API:', error);
+    });
+</script>
 </body>
 </html>
