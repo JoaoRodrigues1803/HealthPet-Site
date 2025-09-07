@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Health</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.16.0/dist/umd/supabase.min.js"></script>
+  <script src="script.js" defer></script>
 </head>
 <body>
 
@@ -43,10 +45,28 @@
   </div>
 
   <script>
-    // Exemplo para simular valor de BPM futuramente
-    // document.getElementById('heart-rate-value').textContent = 72;
-  </script>
-   <script>
+  fetch('https://tcc-api-e2y4.onrender.com')
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Erro: ${response.statusText}`);
+      }
+      return response.text();  // Converte a resposta em texto primeiro
+    })
+    .then(data => {
+      console.log(data);  // Verifique o conteúdo da resposta
+      // Se for um JSON, podemos convertê-lo
+      try {
+        const jsonData = JSON.parse(data);
+        //document.getElementById('heart-rate-value').textContent = jsonData.bpm || '--';
+      } catch (e) {
+        console.error('Erro ao parsear JSON:', e);
+      }
+    })
+    .catch(error => {
+      console.error('Erro ao consultar API:', error);
+    });
+</script>
+  <script>
     async function carregarMapa() {
     // Teste com valores fixos
     const lat = -23.105454851125238;
@@ -58,18 +78,7 @@
 
     carregarMapa();
   </script>
-<script>
-  fetch('https://tcc-api-e2y4.onrender.com')
-    .then(response => response.json())
-    .then(data => {
-      // Exemplo: exibe o resultado no console
-      console.log(data);
-      // Se quiser mostrar algum valor na tela, por exemplo:
-      // document.getElementById('heart-rate-value').textContent = data.bpm || '--';
-    })
-    .catch(error => {
-      console.error('Erro ao consultar API:', error);
-    });
-</script>
+  
+
 </body>
-</html>
+</html>                           
