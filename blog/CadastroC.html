@@ -27,7 +27,7 @@
             user-select: none;
         }
         main {
-            flex: 1;
+            flex: 1 0 auto; /* Corrigido para que main cresça e o footer fique no final */
             overflow-y: auto;
             padding: 20px;
             background: #63c2c9;
@@ -56,13 +56,13 @@
             color: #fff;
         }
         footer {
+            flex-shrink: 0; /* Garante que o footer fique sempre no final */
             background: #222;
             color: #fff;
             text-align: center;
             padding: 18px 0;
             font-size: 1rem;
             letter-spacing: 1px;
-            margin-top: 40px;
         }
         @media (max-width: 600px) {
             .form-cadastro {
@@ -75,11 +75,18 @@
     </style>
 </head>
 <body>
-    <header>Cadastro de Cachorro</header>
+    <header id="titulo-cadastro">Cadastro de Cachorro</header>
     <main>
         <form class="form-cadastro">
             <div class="mb-3">
-                <label for="nome" class="form-label">Nome do Cachorro</label>
+                <label for="tipo-animal" class="form-label">Selecione o Animal</label>
+                <select class="form-select" id="tipo-animal" required>
+                    <option value="cachorro" selected>Cachorro</option>
+                    <option value="gato">Gato</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="nome" class="form-label">Nome do Animal</label>
                 <input type="text" class="form-control" id="nome" required>
             </div>
             <div class="mb-3">
@@ -87,13 +94,20 @@
                 <input type="text" class="form-control" id="raca">
             </div>
             <div class="mb-3">
-                <label for="idade" class="form-label">Idade (anos)</label>
-                <input type="number" class="form-control" id="idade" min="0" required>
+                <label for="pelagem" class="form-label">Pelagem</label>
+                <select class="form-select" id="pelagem" required>
+                    <option value="grande">Grande</option>
+                    <option value="médio">Médio</option>
+                    <option value="pequeno">Pequeno</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="idade" class="form-label">Data de Nascimento</label>
+                <input type="date" class="form-control" id="idade" min="0" required>
             </div>
             <div class="mb-3">
                 <label for="porte" class="form-label">Porte</label>
                 <select class="form-select" id="porte" required>
-                    <option value="">Selecione</option>
                     <option value="pequeno">Pequeno</option>
                     <option value="médio">Médio</option>
                     <option value="grande">Grande</option>
@@ -106,19 +120,13 @@
             <div class="mb-3">
                 <label for="sexo" class="form-label">Sexo</label>
                 <select class="form-select" id="sexo">
-                    <option value="">Selecione</option>
                     <option value="macho">Macho</option>
                     <option value="fêmea">Fêmea</option>
                 </select>
             </div>
             <div class="mb-3">
-                <label for="saude" class="form-label">Condições de Saúde</label>
-                <textarea class="form-control" id="saude" rows="2" placeholder="Ex: saudável, alergias, doenças, etc."></textarea>
-            </div>
-            <div class="mb-3">
                 <label for="vacinas" class="form-label">Vacinas em dia?</label>
                 <select class="form-select" id="vacinas">
-                    <option value="">Selecione</option>
                     <option value="sim">Sim</option>
                     <option value="nao">Não</option>
                 </select>
@@ -126,17 +134,49 @@
             <div class="mb-3">
                 <label for="vermifugado" class="form-label">Vermifugado?</label>
                 <select class="form-select" id="vermifugado">
-                    <option value="">Selecione</option>
                     <option value="sim">Sim</option>
                     <option value="nao">Não</option>
                 </select>
             </div>
             <div class="mb-3">
-                <label for="observacoes" class="form-label">Observações</label>
-                <textarea class="form-control" id="observacoes" rows="2"></textarea>
+                <label for="castrado" class="form-label">Castrado?</label>
+                <select class="form-select" id="castrado">
+                    <option value="sim">Sim</option>
+                    <option value="nao">Não</option>
+                </select>
             </div>
             <button type="submit" class="btn btn-primary w-100">Cadastrar</button>
         </form>
     </main>
     <footer>
-        &copy; 2025 Cadastro Pet | Todos os direitos reservados.
+        &copy; 2025 Health Pet | Todos os direitos reservados.
+    </footer>
+    <script>
+        document.getElementById('tipo-animal').addEventListener('change', function() {
+            const titulo = document.getElementById('titulo-cadastro');
+            titulo.textContent = this.value === 'gato' ? 'Cadastro de Gato' : 'Cadastro de Cachorro';
+        });
+
+        document.querySelector('.form-cadastro').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const tipoAnimal = document.getElementById('tipo-animal').value;
+            const nome = document.getElementById('nome').value;
+            const raca = document.getElementById('raca').value;
+            const pelagem = document.getElementById('pelagem').value;
+            const idade = document.getElementById('idade').value;
+            const porte = document.getElementById('porte').value;
+            const peso = document.getElementById('peso').value;
+            const sexo = document.getElementById('sexo').value;
+            const vacinas = document.getElementById('vacinas').value;
+            const vermifugado = document.getElementById('vermifugado').value;
+            const castrado = document.getElementById('castrado').value;
+
+            const params = new URLSearchParams({
+                tipoAnimal, nome, raca, pelagem, idade, porte, peso, sexo, vacinas, vermifugado, castrado
+            }).toString();
+
+            window.location.href = `FichaPet.html?${params}`;
+        });
+    </script>
+</body>
+</html>
