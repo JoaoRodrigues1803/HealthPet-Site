@@ -137,6 +137,11 @@
             <a href="Login.html" class="btn-link">Já tem uma conta?</a>
             <a href="CadastroC.html" class="btn-link">Cadastrar meu pet</a>
         </div>
+
+    <div id="message-container"></div>
+
+
+
     </main>
     <footer>
         &copy; 2025 Cadastro Pet | Todos os direitos reservados.
@@ -151,6 +156,9 @@
         const { createClient } = supabase
         const _supabase = createClient('https://blcgszqtzogwdwbhgbwq.supabase.co', 'sb_publishable_TegOLAB84L10PLHHKNu7EA_qSA0A112')
 
+        
+        const messageContainer = document.getElementById('message-container');
+
         document.getElementById('formCadastro').addEventListener('submit', async function (event) {
             event.preventDefault();  // Impede o envio padrão do formulário
 
@@ -160,24 +168,42 @@
             const mail = document.getElementById('email').value;
             const pass = document.getElementById('senha').value;
 
-            // Inserir os dados na tabela 'usuarios'
-            const { data, error } = await _supabase
-            .from('usuario')
-            .insert([
-                { nome: name, telefone: phone, email: mail, senha: pass },
-            ])
-            .select()
+            // Realizando o cadastro de usuário com o Supabase
+            const { data, error } = await _supabase.auth.signUp({
+                email: mail,
+                password: pass,
+                telefone: phone,
+                nome: name
+            });
 
-            // Verifica se há erros
             if (error) {
-                console.error("Erro:", error);
-                alert('Erro ao cadastrar usuário: ' + error.message);
-            } else {
-                console.log("Sucesso:", data);
-                alert('Cadastro realizado com sucesso!');
-                window.location.href = "./homeScreen.html";
-            };
+                // Exibe mensagem de erro, caso haja algum problema
+                messageContainer.innerHTML = `<p style="color: red;">Erro: ${error.message}</p>`;
+                return;
+            }
 
+            // Exibe mensagem de sucesso
+            messageContainer.innerHTML = `<p style="color: green;">Usuário cadastrado com sucesso!</p>`;
+            console.log('Dados do usuário:', data); // Verificar os dados do usuário no console
+
+            // Após o cadastro, inserimos dados adicionais (telefone, nome) na tabela "usuarios"
+            const { error: insertError } = await _supabase
+                .from('usuario')  // Nome da sua tabela personalizada
+                .insert([
+                    {
+                        email: mail,  // O email será o mesmo
+                        telefone: phone,
+                        nome: name,
+                        senha: pass
+                    }
+                ]);
+
+            if (insertError) {
+                messageContainer.innerHTML += `<p style="color: red;">Erro ao salvar dados adicionais: ${insertError.message}</p>`;
+            } else {
+                messageContainer.innerHTML += `<p style="color: green;">Dados adicionais salvos com sucesso!</p>`;
+            }
+            
         });
     </script>
 </body>
