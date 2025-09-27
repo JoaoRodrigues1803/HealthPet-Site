@@ -173,7 +173,7 @@
             event.preventDefault();  // Impede o envio padrão do formulário
 
             // Pega usuário logado
-            const { data: { user }, error: userError } = await supabase.auth.getUser()
+            const { data: { user }, error: userError } = await _supabase.auth.getUser()
             if (userError || !user) {
             alert("Você precisa estar logado para cadastrar um pet")
             return
@@ -181,7 +181,7 @@
 
             // Coleta valores do formulário
             const pet = {
-            tipo: document.getElementById("tipo-animal").value,
+            tipo_animal: document.getElementById("tipo-animal").value,
             nome: document.getElementById("nome").value,
             raca: document.getElementById("raca").value,
             pelagem: document.getElementById("pelagem").value,
@@ -189,21 +189,23 @@
             porte: document.getElementById("porte").value,
             peso: document.getElementById("peso").value,
             sexo: document.getElementById("sexo").value,
-            vacinas: document.getElementById("vacinas").value,
-            vermifugado: document.getElementById("vermifugado").value,
-            castrado: document.getElementById("castrado").value,
-            usuario_id: user.id // 🔹 FK automática
+            vacinas: document.getElementById("vacinas").value === "sim",        // 🔹 convertendo
+            vermifugado: document.getElementById("vermifugado").value === "sim",// 🔹 convertendo
+            castrado: document.getElementById("castrado").value === "sim",      // 🔹 convertendo
+            tutor_id: user.id // 🔹 FK automática
             }
 
             // Insere no Supabase
-            const { data, error } = await supabase.from("dados_pet").insert([pet]) 
+            const { data, error } = await _supabase.from("dados_pet").insert([pet]) 
 
             if (error) {
             console.error(error)
             alert("Erro ao cadastrar pet: " + error.message)
             } else {
             alert("Pet cadastrado com sucesso!")
-            form.reset()
+            // Limpa o formulário
+            document.getElementById('formCadastro').reset()
+            window.location.href = 'homeScreen.html'; // Redireciona para a página de login
             }
         })
     </script>

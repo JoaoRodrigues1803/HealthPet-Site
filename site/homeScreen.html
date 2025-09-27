@@ -6,7 +6,6 @@
   <title>Health</title>
   <link rel="stylesheet" href="../style.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.16.0/dist/umd/supabase.min.js"></script>
-  <script src="../scripts/HomeScreen.js" defer></script>
 </head>
 <body>
 
@@ -43,6 +42,36 @@
     <a href="agenda.html">Agenda</a>
     <a href="blog.html">Blog</a>
   </div>
+
+
+  <script>
+    async function inserirDadoTeste() {
+      const response = await fetch("https://blcgszqtzogwdwbhgbwq.supabase.co/rest/v1/coleta_de_dados", {
+        method: "POST",
+        headers: {
+          "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsY2dzenF0em9nd2R3YmhnYndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2MzU5MDAsImV4cCI6MjA1OTIxMTkwMH0.KahCjcUrdvjIMOjzM_hzvGpm5Oosvhrm80ysAkLeMGo",  // use a public (anon key) aqui
+          "Authorization": "Bearer SUA_API_KEY",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          frequencia_cardiaca: 85,
+          data_hora: new Date().toISOString(), 
+          latitude: -23.5505,
+          longitude: -46.6333,
+          fk_pet_id: 1   // 🔹 id do pet que você cadastrou antes
+        })
+      });
+
+      const data = await response.json();
+      console.log(data);
+      alert("Inserção realizada! Veja o console.");
+    }
+  </script>
+
+<button onclick="inserirDadoTeste()">Inserir dado de teste</button>
+
+
+
 
 </body>
 </html>                           
