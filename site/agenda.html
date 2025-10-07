@@ -217,6 +217,9 @@
     <a href="blog.html">Blog</a>
   </div>
 
+
+   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <script>
     const monthYear = document.getElementById("month-year");
     const daysContainer = document.getElementById("days");
@@ -225,9 +228,12 @@
     const eventList = document.getElementById("event-list");
 
     let currentDate = new Date();
-    let events = {};
+    let user = null;  // será definido após login
+    const { createClient } = supabase
+    const supabaseClient = createClient('https://blcgszqtzogwdwbhgbwq.supabase.co', 'sb_publishable_TegOLAB84L10PLHHKNu7EA_qSA0A112')
 
-    function renderCalendar() {
+    async function renderCalendar() {
+      console.log("Renderizando calendário", new Date().toISOString());
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth();
       const firstDay = new Date(year, month, 1).getDay();
@@ -239,6 +245,23 @@
       });
 
       daysContainer.innerHTML = "";
+
+      // Busca eventos do mês no Supabase para marcar dias
+      let eventosMensais = [];
+      if (user) {
+        const startDate = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+        const endDate = `${year}-${String(month + 1).padStart(2, '0')}-${lastDate}`;
+        const { data, error } = await supabaseClient
+          .from('agenda_eventos')
+          .select('date')
+          .eq('user_id', user.id)
+          .gte('date', startDate)
+          .lte('date', endDate);
+        
+        if (!error && data) {
+          eventosMensais = data.map(e => e.date.split('T')[0]);
+        }
+      }
 
       for (let i = 0; i < firstDay; i++) {
         const empty = document.createElement("div");
@@ -259,46 +282,81 @@
           dayEl.classList.add("today");
         }
 
-        const dateKey = `${year}-${month + 1}-${day}`;
-        if (events[dateKey]) {
+        const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+        if (eventosMensais.includes(dateKey)) {
           dayEl.classList.add("event-day");
         }
 
         dayEl.addEventListener("click", () => manageEvents(dateKey));
         daysContainer.appendChild(dayEl);
       }
+      console.log("Datas com eventos:", eventosMensais);
+
     }
 
-    function manageEvents(dateKey) {
-      const action = prompt(
-        `Data: ${dateKey}\nDigite:\n1 - Adicionar evento\n2 - Ver/Deletar eventos`
-      );
+    async function manageEvents(dateKey) {
+      await showEvents(dateKey);
 
-      if (action === "1") {
-        const event = prompt("Adicionar evento:");
-        if (event) {
-          if (!events[dateKey]) events[dateKey] = [];
-          events[dateKey].push(event);
-          renderCalendar();
-          showEvents(dateKey);
+      // Remove botão antigo, se houver
+      const existingBtn = document.getElementById("add-event-btn");
+      if (existingBtn) existingBtn.remove();
+
+      // Cria botão para adicionar evento
+      const addBtn = document.createElement("button");
+      addBtn.textContent = "Adicionar evento";
+      addBtn.id = "add-event-btn";
+      addBtn.style.marginTop = "10px";
+      addBtn.style.padding = "6px 10px";
+      addBtn.style.backgroundColor = "#28a745";
+      addBtn.style.color = "white";
+      addBtn.style.border = "none";
+      addBtn.style.borderRadius = "6px";
+      addBtn.style.cursor = "pointer";
+
+      addBtn.addEventListener("click", async () => {
+        const description = prompt("Digite o nome do evento:");
+        if (description) {
+          await addEventToSupabase(dateKey, description);
+          await renderCalendar();
+          await showEvents(dateKey);
         }
-      } else if (action === "2") {
-        showEvents(dateKey);
-      }
+      });
+
+      eventList.appendChild(addBtn);
     }
 
-    function showEvents(dateKey) {
-      if (events[dateKey]) {
+    async function showEvents(dateKey) {
+      if (!user) {
+        eventList.innerHTML = "<strong>Eventos:</strong><br>Você precisa estar logado.";
+        return;
+      }
+
+      const { data: eventos, error } = await supabaseClient
+        .from('agenda_eventos')
+        .select('id, description, date')
+        .eq('user_id', user.id)
+        .eq('date', dateKey);
+
+      if (error) {
+        console.error("Erro ao carregar eventos:", error.message);
+        eventList.innerHTML = "<strong>Eventos:</strong><br>Erro ao carregar eventos.";
+        return;
+      }
+
+      if (eventos.length > 0) {
         eventList.innerHTML = "<strong>Eventos em " + dateKey + ":</strong><br>";
-        events[dateKey].forEach((e, index) => {
+        eventos.forEach((e) => {
           const div = document.createElement("div");
           div.classList.add("event-item");
           div.innerHTML = `
-            <span>${e}</span>
+            <span>${e.description}</span>
             <button class="delete-btn">❌</button>
           `;
-          div.querySelector(".delete-btn").addEventListener("click", () => {
-            deleteEvent(dateKey, index);
+          div.querySelector(".delete-btn").addEventListener("click", async () => {
+            await deleteEvent(dateKey, e.id);
+            await renderCalendar();
+            await showEvents(dateKey);
           });
           eventList.appendChild(div);
         });
@@ -307,13 +365,45 @@
       }
     }
 
-    function deleteEvent(dateKey, index) {
-      events[dateKey].splice(index, 1);
-      if (events[dateKey].length === 0) {
-        delete events[dateKey];
+    async function addEventToSupabase(dateKey, eventDescription) {
+      if (!user) {
+        alert("Você precisa estar logado para adicionar eventos!");
+        return;
       }
-      renderCalendar();
-      showEvents(dateKey);
+
+      const { error } = await supabaseClient
+        .from('agenda_eventos')
+        .insert([
+          {
+            date: dateKey,
+            description: eventDescription,
+            user_id: user.id,
+          },
+        ]);
+
+      if (error) {
+        alert('Erro ao salvar o evento: ' + error.message);
+      } else {
+        alert('Evento adicionado com sucesso!');
+      }
+    }
+
+    async function deleteEvent(dateKey, eventId) {
+      if (!user) {
+        alert("Você precisa estar logado para deletar eventos!");
+        return;
+      }
+
+      const { error } = await supabaseClient
+        .from('agenda_eventos')
+        .delete()
+        .match({ id: eventId, user_id: user.id });
+
+      if (error) {
+        alert('Erro ao deletar o evento: ' + error.message);
+      } else {
+        alert('Evento deletado com sucesso!');
+      }
     }
 
     prevBtn.addEventListener("click", () => {
@@ -326,7 +416,14 @@
       renderCalendar();
     });
 
-    renderCalendar();
+    // Captura usuário após login
+    
+
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+      user = session?.user;
+      renderCalendar();
+    });
+
   </script>
 </body>
 </html>
