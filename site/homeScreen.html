@@ -53,20 +53,44 @@
     const { createClient } = supabase;
     const _supabase = createClient('https://blcgszqtzogwdwbhgbwq.supabase.co', 'sb_publishable_TegOLAB84L10PLHHKNu7EA_qSA0A112');
 
-    let { data: coleta_de_dados, error } = await supabase
-    .from('coleta_de_dados')
-    .select('frequencia_cardiaca,latitude,longitude')
+    // Elementos HTML
+    const heartRateElement = document.getElementById('heart-rate-value');
+    const mapFrame = document.getElementById('map');
 
-    let bpm = frequencia_cardiaca;
-    let lat = latitude;
-    let lon = longitude;
-    
+    // Função para carregar os dados mais recentes
+    async function carregarDados() {
+      const { data, error } = await _supabase
+        .from('coleta_de_dados')
+        .select('frequencia_cardiaca, latitude, longitude')
+        .order('id', { ascending: false }) // Pega o registro mais recente
+        .limit(1)
+        .single();
 
-      
-      
-    
+      if (error) {
+        console.error('Erro ao buscar dados:', error);
+        return;
+      }
+
+      if (data) {
+        const { frequencia_cardiaca, latitude, longitude } = data;
+
+        // Atualiza o BPM na tela
+        heartRateElement.textContent = frequencia_cardiaca ?? '--';
+
+        // Atualiza o mapa do Google Maps
+        if (latitude && longitude) {
+          const mapUrl = `https://maps.google.com/maps?q=${latitude},${longitude}&z=15&output=embed`;
+          mapFrame.src = mapUrl;
+        }
+      }
+    }
+
+    // Chama ao carregar
+    carregarDados();
+
+    // Atualiza automaticamente a cada 10 segundos
+    setInterval(carregarDados, 10000);
   </script>
-
 
 
 
