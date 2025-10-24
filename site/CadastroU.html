@@ -180,7 +180,7 @@
 
             if (error) {
                 // Exibe mensagem de erro, caso haja algum problema
-                messageContainer.innerHTML = `<p style="color: red;">Erro: ${error.message}</p>`;
+                // messageContainer.innerHTML = `<p style="color: red;">Erro: ${error.message}</p>`;
                 return;
             }
             const user = data.user;
@@ -202,7 +202,7 @@
             }
 
             // Exibe mensagem de sucesso
-            messageContainer.innerHTML = `<p style="color: green;">Usuário cadastrado com sucesso!</p>`;
+            // messageContainer.innerHTML = `<p style="color: green;">Usuário cadastrado com sucesso!</p>`;
             console.log('Dados do usuário:', data); // Verificar os dados do usuário no console
 
             // Após o cadastro, inserimos dados adicionais (telefone, nome) na tabela "usuarios"
@@ -218,10 +218,10 @@
                 ]);
 
             if (insertError) {
-                messageContainer.innerHTML += `<p style="color: red;">Erro ao salvar dados adicionais: ${insertError.message}</p>`;
+                // messageContainer.innerHTML += `<p style="color: red;">Erro ao salvar dados adicionais: ${insertError.message}</p>`;
             } else {
-                messageContainer.innerHTML += `<p style="color: green;">Dados adicionais salvos com sucesso!</p>`;
-                window.location.href = '/site/Login.html'; // Redireciona para a página de login
+                // messageContainer.innerHTML += `<p style="color: green;">Dados adicionais salvos com sucesso!</p>`;
+                window.location.href = 'https://healthpet-app.netlify.app/site/Login.html'; // Redireciona para a página de login
             }
             
         });
