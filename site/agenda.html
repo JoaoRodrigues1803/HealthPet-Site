@@ -223,7 +223,7 @@
 
    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <script>
+  <script type="module">
     const monthYear = document.getElementById("month-year");
     const daysContainer = document.getElementById("days");
     const prevBtn = document.getElementById("prev");
@@ -371,6 +371,7 @@
     async function addEventToSupabase(dateKey, eventDescription) {
       if (!user) {
         alert("Você precisa estar logado para adicionar eventos!");
+        window.location.href = 'Login.html';
         return;
       }
 

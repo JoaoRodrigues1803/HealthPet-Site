@@ -102,6 +102,23 @@
       text-transform: capitalize;
     }
 
+    .btn-delete {
+            width: 150px;
+            margin-bottom: 18px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            background: red;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 14px 0;
+            transition: background 0.3s;
+        }
+        .btn-delete:hover {
+            background: darkred;
+            color: white;
+        }
+        
     @media (max-width: 576px) {
       .info-item {
         flex-direction: column;
@@ -112,7 +129,7 @@
 </head>
 <body>
 
-  <div class="profile-container">
+  <div id="div" class="profile-container">
     <div class="profile-header">
       <h1>Meu Perfil</h1>
     </div>
@@ -179,6 +196,7 @@
       </div>
     </div>
 
+    <button type="submit" class="btn btn-delete">Sair</button>
   </div>
 
   <div class="navbar">
@@ -191,51 +209,64 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script type="module">
-  const { createClient } = supabase
-  const _supabase = createClient(
-    'https://blcgszqtzogwdwbhgbwq.supabase.co',
-    'sb_publishable_TegOLAB84L10PLHHKNu7EA_qSA0A112'
-  )
+    const { createClient } = supabase
+    const _supabase = createClient(
+      'https://blcgszqtzogwdwbhgbwq.supabase.co',
+      'sb_publishable_TegOLAB84L10PLHHKNu7EA_qSA0A112'
+    )
 
-  const { data: { user }, error: userError } = await _supabase.auth.getUser()
+    const { data: { user }, error: userError } = await _supabase.auth.getUser()
 
-  if (userError || !user) {
-    alert("Você precisa estar logado para visualizar o perfil")
-  } else {
-    // ✅ Troque 'auth_id' pelo nome correto da coluna na sua tabela 'usuario'
-    let { data: usuario, error } = await _supabase
-      .from('usuario')
-      .select('*')
-      .eq('auth_id', user.id) 
-
-    if (error) {
-      console.error("Erro ao buscar dados do usuário:", error)
-    } else if (usuario && usuario.length > 0) {
-      document.getElementById('nome').textContent = usuario[0].nome
-      document.getElementById('email').textContent = usuario[0].email
-      document.getElementById('telefone').textContent = usuario[0].telefone
-      document.getElementById('senha').textContent = usuario[0].senha
+    if (userError || !user) {
+      alert("Você precisa estar logado para visualizar o perfil")
+      window.location.href = 'Login.html'
     } else {
-      console.warn("Nenhum dado de usuário encontrado para o ID:", user.id)
+      // ✅ Troque 'auth_id' pelo nome correto da coluna na sua tabela 'usuario'
+      let { data: usuario, error } = await _supabase
+        .from('usuario')
+        .select('*')
+        .eq('auth_id', user.id) 
+
+      if (error) {
+        console.error("Erro ao buscar dados do usuário:", error)
+      } else if (usuario && usuario.length > 0) {
+        document.getElementById('nome').textContent = usuario[0].nome
+        document.getElementById('email').textContent = usuario[0].email
+        document.getElementById('telefone').textContent = usuario[0].telefone
+        document.getElementById('senha').textContent = usuario[0].senha
+      } else {
+        console.warn("Nenhum dado de usuário encontrado para o ID:", user.id)
+      }
+
+      let { data: dados_pet, error: petError } = await _supabase
+        .from('dados_pet')
+        .select('*')
+        .eq('tutor_id', user.id)
+
+      if (!petError && dados_pet.length > 0) {
+        const pet = dados_pet[0]
+        document.getElementById('tipoPet').textContent = pet.tipo_animal
+        document.getElementById('raca').textContent = pet.raca
+        document.getElementById('pelagem').textContent = pet.pelagem
+        document.getElementById('porte').textContent = pet.porte
+        document.getElementById('peso').textContent = pet.peso + " kg"
+        document.getElementById('castrado').textContent = pet.castrado ? "Sim" : "Não"
+        document.getElementById('vacinado').textContent = pet.vacinas ? "Sim" : "Não"
+        document.getElementById('Vermifugado').textContent = pet.vermifugado ? "Sim" : "Não"
+      }
     }
 
-    let { data: dados_pet, error: petError } = await _supabase
-      .from('dados_pet')
-      .select('*')
-      .eq('tutor_id', user.id)
+    document.getElementById("div").addEventListener('click', async function (event) {
+      console.log("Logout iniciado");
+        event.preventDefault();
+        const { error } = await _supabase.auth.signOut();
+        if (error) {
+            console.error("Erro ao deslogar:", error);
+        } else {
+            window.location.href = 'Login.html'; // Redireciona para a página de login após o logout
+        }
 
-    if (!petError && dados_pet.length > 0) {
-      const pet = dados_pet[0]
-      document.getElementById('tipoPet').textContent = pet.tipo_animal
-      document.getElementById('raca').textContent = pet.raca
-      document.getElementById('pelagem').textContent = pet.pelagem
-      document.getElementById('porte').textContent = pet.porte
-      document.getElementById('peso').textContent = pet.peso + " kg"
-      document.getElementById('castrado').textContent = pet.castrado ? "Sim" : "Não"
-      document.getElementById('vacinado').textContent = pet.vacinas ? "Sim" : "Não"
-      document.getElementById('Vermifugado').textContent = pet.vermifugado ? "Sim" : "Não"
-    }
-  }
+    });
 </script>
 
 

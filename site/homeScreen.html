@@ -49,9 +49,22 @@
 
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
+  <script type="module">
     const { createClient } = supabase;
     const _supabase = createClient('https://blcgszqtzogwdwbhgbwq.supabase.co', 'sb_publishable_TegOLAB84L10PLHHKNu7EA_qSA0A112');
+
+    const { data: { user }, error: userError } = await _supabase.auth.getUser()
+    console.log(user);
+
+    if (userError || !user) {
+      alert("Ops! parece que voce fez login!")
+      window.location.href = 'Login.html'
+    } else {
+      // ✅ Troque 'auth_id' pelo nome correto da coluna na sua tabela 'usuario'
+      let { data: usuario, error } = await _supabase
+        .from('usuario')
+        .select('*')
+        .eq('auth_id', user.id) }
 
     // Elementos HTML
     const heartRateElement = document.getElementById('heart-rate-value');
