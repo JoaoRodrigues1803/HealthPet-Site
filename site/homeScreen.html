@@ -75,9 +75,11 @@
       const { data, error } = await _supabase
         .from('coleta_de_dados')
         .select('frequencia_cardiaca, latitude, longitude')
-        .order('id', { ascending: false }) // Pega o registro mais recente
-        .limit(1)
-        .single();
+        .eq('tutor_id', user.id) 
+        // .order('id', { ascending: false }) // Pega o registro mais recente
+        // .limit(1)
+        // .single();
+        
 
       if (error) {
         console.error('Erro ao buscar dados:', error);
