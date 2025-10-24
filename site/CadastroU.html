@@ -187,7 +187,7 @@
 
             // 3️⃣ Inserir os dados adicionais na tabela 'usuarios'
             const { data: insertedData, error: erro } = await _supabase
-            .from('usuarios')
+            .from('usuario')
             .insert([
                 {
                 auth_id: user.id,
