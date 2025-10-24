@@ -176,13 +176,29 @@
                 password: pass,
                 telefone: phone,
                 nome: name,
-                auth_id: user.id, // aqui é o vínculo
             });
 
             if (error) {
                 // Exibe mensagem de erro, caso haja algum problema
                 messageContainer.innerHTML = `<p style="color: red;">Erro: ${error.message}</p>`;
                 return;
+            }
+            const user = data.user;
+
+            // 3️⃣ Inserir os dados adicionais na tabela 'usuarios'
+            const { data: insertedData, error: erro } = await _supabase
+            .from('usuarios')
+            .insert([
+                {
+                auth_id: user.id,
+                },
+            ]);
+
+            if (erro) {
+            console.error('Erro ao salvar dados adicionais:', insertError.message);
+            } else {
+            console.log('Usuário cadastrado com sucesso!');
+            console.log(insertedData);
             }
 
             // Exibe mensagem de sucesso
