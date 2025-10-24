@@ -58,7 +58,7 @@
 
     if (userError || !user) {
       alert("Ops! parece que voce fez login!")
-      window.location.href = 'https://healthpet-app.netlify.app/site/Login.html';
+      window.location.href = 'https://healthpet-app.netlify.app/site/Login';
     } else {
       // ✅ Troque 'auth_id' pelo nome correto da coluna na sua tabela 'usuario'
       let { data: usuario, error } = await _supabase
