@@ -50,99 +50,88 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script type="module">
-     const { createClient } = supabase;
-    const _supabase = createClient(
-      'https://blcgszqtzogwdwbhgbwq.supabase.co',
-      'sb-publishable_TegOLAB84L10PLHHKNu7EA_qSA0A112',
-      {
-        auth: {
-          persistSession: true,
-          autoRefreshToken: true,
-          detectSessionInUrl: true
-        }
-      }
-    );
-      const { data: sessionData, error } = await _supabase.auth.getSession();
-      console.log("Sessão atual:", sessionData);
-    // Elementos HTML
-    const heartRateElement = document.getElementById('heart-rate-value');
-    const mapFrame = document.getElementById('map');
+    const { createClient } = supabase;
+    const _supabase = createClient('https://blcgszqtzogwdwbhgbwq.supabase.co', 'sb_publishable_TegOLAB84L10PLHHKNu7EA_qSA0A112');
 
     // ==========================
     // 🔹 PASSO 1: VERIFICAR LOGIN
     // ==========================
-    const { data: { user }, error: userError } = await _supabase.auth.getUser();
+    const { data: { user }, error: userError } = await _supabase.auth.getUser()
     if (userError || !user) {
-      alert("Ops! parece que você não fez login!");
-      window.location.href = 'https://healthpet-app.netlify.app/site/Login';
-    }
+      alert("Ops! parece que voce fez login!")
+      window.location.href = '/site/Login';
+    } else {
+      // ✅ Troque 'auth_id' pelo nome correto da coluna na sua tabela 'usuario'
+      let { data: usuario, error } = await _supabase
+        .from('usuario')
+        .select('*')
+        .eq('auth_id', user.id) 
+      }
 
-    // ================================
-    // 🔹 PASSO 2: PEGAR O PET DO USUÁRIO
-    // ================================
-    // Busca o usuário na tabela "usuario"
-    const { data: usuarioData, error: usuarioError } = await _supabase
-      .from('usuario')
-      .select('id')
-      .eq('auth_id', user.id)
-      .single();
-
-    if (usuarioError || !usuarioData) {
-      console.error("Erro ao buscar usuário:", usuarioError?.message);
-      alert("Não foi possível identificar seu perfil de usuário.");
-    }
-
-    // Busca o pet associado a esse usuário
-    const { data: petData, error: petError } = await _supabase
+    // ==========================
+        
+      const { data: pet, error: petError } = await _supabase
       .from('pet')
       .select('*')
-      .eq('tutor_id', usuarioData.id)
-      .single();
+      .eq('tutor_auth', user.id)
+      console.log(pet);
+      if (petError || !pet) {
+      console.error('Erro ao buscar pet:', petError);
+      }
 
-    if (petError || !petData) {
-      console.error("Erro ao buscar pet:", petError?.message);
-      alert("Nenhum pet encontrado para este usuário.");
+    // Elementos HTML
+    const heartRateElement = document.getElementById('heart-rate-value');
+    const mapFrame = document.getElementById('map');
+
+    // Função para carregar os dados mais recentes
+    async function carregarDados() {
+    const { data, error } = await _supabase
+      .from('dados_sensor')
+      .select('valores')
+      .eq('mac_placa', pet[0].mac_placa);
+
+    console.log('Dados do Supabase:', data);
+
+    if (error) {
+      console.error('Erro ao buscar dados:', error);
+      return;
     }
 
-    console.log("Pet encontrado:", petData);
+    if (!data || data.length === 0) {
+      console.warn('Nenhum dado encontrado para este pet.');
+      heartRateElement.textContent = '--';
+      return;
+    }
+     // Pega o último registro
+  const ultimoDado = data[data.length - 1];
 
-    // ===================================
-    // 🔹 PASSO 3: FUNÇÃO PARA CARREGAR DADOS DO SENSOR
-    // ===================================
-    async function carregarDados() {
-      const { data, error } = await _supabase
-        .from('dados_sensor')
-        .select('valores')
-        .eq('mac_placa', petData.mac_placa)
-        .order('id', { ascending: false })
-        .limit(1); // pega o registro mais recente
+  // Faz o parse do JSON (caso seja string)
+  let valores;
+  try {
+    valores = typeof ultimoDado.valores === 'string'
+      ? JSON.parse(ultimoDado.valores)
+      : ultimoDado.valores;
+  } catch (e) {
+    console.error('Erro ao converter valores:', e);
+    valores = {};
+  }
 
-      if (error) {
-        console.error("Erro ao buscar dados do sensor:", error);
-      }
+  // Extrai os campos
+  const frequencia = valores.frequencia ?? '--';
+  const latitude = valores.latitude ?? null;
+  const longitude = valores.longitude ?? null;
 
-      if (!data || data.length === 0) {
-        console.warn("Nenhum dado de sensor encontrado para essa mac_placa.");
-      }
+  console.log('Frequência:', frequencia, 'Lat:', latitude, 'Lng:', longitude);
 
-      // Extrai e converte o JSON armazenado em texto
-      const valores = JSON.parse(data[0].valores);
+    // Atualiza o BPM na tela
+    heartRateElement.textContent = frequencia ?? '--';
 
-      const frequencia = valores.frequencia ?? '--';
-      const latitude = valores.latitude;
-      const longitude = valores.longitude;
+    // Atualiza o mapa do Google Maps
+    if (latitude !== null && longitude !== null) {
+      const mapUrl = `https://maps.google.com/maps?q=${latitude},${longitude}&z=15&output=embed`;
+      mapFrame.src = mapUrl;
+    }
 
-      // Atualiza o BPM na tela
-      heartRateElement.textContent = frequencia;
-
-      // Atualiza o mapa do Google Maps
-      if (latitude && longitude) {
-        const mapUrl = `https://maps.google.com/maps?q=${latitude},${longitude}&z=15&output=embed`;
-        mapFrame.src = mapUrl;
-      }
-
-      console.log("Frequência:", frequencia);
-      console.log("Localização:", latitude, longitude);
     }
 
     // Chama ao carregar
@@ -150,6 +139,7 @@
 
     // Atualiza automaticamente a cada 10 segundos
     setInterval(carregarDados, 10000);
+    console.log(user.id)
   </script>
 
 
