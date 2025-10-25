@@ -50,54 +50,91 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script type="module">
-    const { createClient } = supabase;
-    const _supabase = createClient('https://blcgszqtzogwdwbhgbwq.supabase.co', 'sb_publishable_TegOLAB84L10PLHHKNu7EA_qSA0A112');
-
-    const { data: { user }, error: userError } = await _supabase.auth.getUser()
-    console.log(user);
-
-    if (userError || !user) {
-      alert("Ops! parece que voce fez login!")
-      window.location.href = 'https://healthpet-app.netlify.app/site/Login';
-    } else {
-      // ✅ Troque 'auth_id' pelo nome correto da coluna na sua tabela 'usuario'
-      let { data: usuario, error } = await _supabase
-        .from('usuario')
-        .select('*')
-        .eq('auth_id', user.id) }
+     const { createClient } = supabase;
+    const _supabase = createClient(
+      'https://blcgszqtzogwdwbhgbwq.supabase.co',
+      'sb-publishable_TegOLAB84L10PLHHKNu7EA_qSA0A112'
+    );
 
     // Elementos HTML
     const heartRateElement = document.getElementById('heart-rate-value');
     const mapFrame = document.getElementById('map');
 
-    // Função para carregar os dados mais recentes
+    // ==========================
+    // 🔹 PASSO 1: VERIFICAR LOGIN
+    // ==========================
+    const { data: { user }, error: userError } = await _supabase.auth.getUser();
+    if (userError || !user) {
+      alert("Ops! parece que você não fez login!");
+      window.location.href = 'https://healthpet-app.netlify.app/site/Login';
+    }
+
+    // ================================
+    // 🔹 PASSO 2: PEGAR O PET DO USUÁRIO
+    // ================================
+    // Busca o usuário na tabela "usuario"
+    const { data: usuarioData, error: usuarioError } = await _supabase
+      .from('usuario')
+      .select('id')
+      .eq('auth_id', user.id)
+      .single();
+
+    if (usuarioError || !usuarioData) {
+      console.error("Erro ao buscar usuário:", usuarioError?.message);
+      alert("Não foi possível identificar seu perfil de usuário.");
+    }
+
+    // Busca o pet associado a esse usuário
+    const { data: petData, error: petError } = await _supabase
+      .from('pet')
+      .select('*')
+      .eq('tutor_id', usuarioData.id)
+      .single();
+
+    if (petError || !petData) {
+      console.error("Erro ao buscar pet:", petError?.message);
+      alert("Nenhum pet encontrado para este usuário.");
+    }
+
+    console.log("Pet encontrado:", petData);
+
+    // ===================================
+    // 🔹 PASSO 3: FUNÇÃO PARA CARREGAR DADOS DO SENSOR
+    // ===================================
     async function carregarDados() {
       const { data, error } = await _supabase
-        .from('coleta_de_dados')
-        .select('frequencia_cardiaca, latitude, longitude')
-        // .eq('tutor_id', user.id) 
-        .order('id', { ascending: false }) // Pega o registro mais recente
-        .limit(1)
-        .single();
-        
+        .from('dados_sensor')
+        .select('valores')
+        .eq('mac_placa', petData.mac_placa)
+        .order('id', { ascending: false })
+        .limit(1); // pega o registro mais recente
 
       if (error) {
-        console.error('Erro ao buscar dados:', error);
-        return;
+        console.error("Erro ao buscar dados do sensor:", error);
       }
 
-      if (data) {
-        const { frequencia_cardiaca, latitude, longitude } = data;
-
-        // Atualiza o BPM na tela
-        heartRateElement.textContent = frequencia_cardiaca ?? '--';
-
-        // Atualiza o mapa do Google Maps
-        if (latitude && longitude) {
-          const mapUrl = `https://maps.google.com/maps?q=${latitude},${longitude}&z=15&output=embed`;
-          mapFrame.src = mapUrl;
-        }
+      if (!data || data.length === 0) {
+        console.warn("Nenhum dado de sensor encontrado para essa mac_placa.");
       }
+
+      // Extrai e converte o JSON armazenado em texto
+      const valores = JSON.parse(data[0].valores);
+
+      const frequencia = valores.frequencia ?? '--';
+      const latitude = valores.latitude;
+      const longitude = valores.longitude;
+
+      // Atualiza o BPM na tela
+      heartRateElement.textContent = frequencia;
+
+      // Atualiza o mapa do Google Maps
+      if (latitude && longitude) {
+        const mapUrl = `https://maps.google.com/maps?q=${latitude},${longitude}&z=15&output=embed`;
+        mapFrame.src = mapUrl;
+      }
+
+      console.log("Frequência:", frequencia);
+      console.log("Localização:", latitude, longitude);
     }
 
     // Chama ao carregar

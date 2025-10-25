@@ -130,6 +130,9 @@
           <option value="gato">Gato</option>
         </select>
 
+        <label for="raca" class="form-label">MAC da placa</label>
+        <input type="text" id="mac_placa" class="form-control" />
+
         <label for="nome" class="form-label">Nome do Animal</label>
         <input type="text" id="nome" class="form-control" required />
 
@@ -198,14 +201,31 @@
     document.getElementById('formCadastro').addEventListener('submit', async function (event) {
       event.preventDefault();
 
+      // 1️⃣ Verifica se o usuário está autenticado
       const { data: { user }, error: userError } = await _supabase.auth.getUser();
       if (userError || !user) {
         alert("Você precisa estar logado para cadastrar um pet");
         return;
       }
 
+
+      // 2️⃣ Busca o ID da tabela 'usuario' correspondente ao usuário autenticado
+      const { data: usuarioData, error: usuarioError } = await _supabase
+        .from("usuario")
+        .select("id")
+        .eq("auth_id", user.id) // 'auth_id' é a FK que você salvou no cadastro
+        .single();
+
+      if (usuarioError || !usuarioData) {
+        console.error("Erro ao buscar usuário:", usuarioError?.message);
+        alert("Não foi possível identificar seu perfil de usuário.");
+        return;
+      }
+
+      // 3️⃣ Monta o objeto do pet com o ID do usuário da tabela 'usuario'
       const pet = {
         tipo_animal: document.getElementById("tipo-animal").value,
+        mac_placa: document.getElementById("mac_placa").value,
         nome: document.getElementById("nome").value,
         raca: document.getElementById("raca").value,
         pelagem: document.getElementById("pelagem").value,
@@ -216,10 +236,10 @@
         vacinas: document.getElementById("vacinas").value === "sim",
         vermifugado: document.getElementById("vermifugado").value === "sim",
         castrado: document.getElementById("castrado").value === "sim",
-        tutor_id: user.id
+        tutor_id: usuarioData.id // agora vem da tabela 'usuario'
       };
 
-      const { data, error } = await _supabase.from("dados_pet").insert([pet]);
+      const { data, error } = await _supabase.from("pet").insert([pet]);
 
       if (error) {
         console.error(error);
