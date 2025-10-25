@@ -196,7 +196,17 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script type="module">
     const { createClient } = supabase;
-    const _supabase = createClient('https://blcgszqtzogwdwbhgbwq.supabase.co', 'sb_publishable_TegOLAB84L10PLHHKNu7EA_qSA0A112');
+    const _supabase = createClient(
+      'https://blcgszqtzogwdwbhgbwq.supabase.co',
+      'sb_publishable_TegOLAB84L10PLHHKNu7EA_qSA0A112',
+      {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true
+        }
+      }
+    );
 
     document.getElementById('formCadastro').addEventListener('submit', async function (event) {
       event.preventDefault();

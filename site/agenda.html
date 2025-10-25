@@ -233,7 +233,17 @@
     let currentDate = new Date();
     let user = null;  // será definido após login
     const { createClient } = supabase
-    const supabaseClient = createClient('https://blcgszqtzogwdwbhgbwq.supabase.co', 'sb_publishable_TegOLAB84L10PLHHKNu7EA_qSA0A112')
+    const supabaseClient = createClient(
+      'https://blcgszqtzogwdwbhgbwq.supabase.co',
+      'sb_publishable_TegOLAB84L10PLHHKNu7EA_qSA0A112',
+      {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true
+        }
+      }
+    )
 
     async function renderCalendar() {
       console.log("Renderizando calendário", new Date().toISOString());

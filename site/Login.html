@@ -142,7 +142,16 @@
 
     <script>
         const { createClient } = supabase
-        const supabaseClient = createClient('https://blcgszqtzogwdwbhgbwq.supabase.co', 'sb_publishable_TegOLAB84L10PLHHKNu7EA_qSA0A112')
+        const supabaseClient = createClient(
+        'https://blcgszqtzogwdwbhgbwq.supabase.co',
+        'sb_publishable_TegOLAB84L10PLHHKNu7EA_qSA0A112',
+        {
+            auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true
+            }
+        })
 
         document.getElementById('formCadPet').addEventListener('submit', async function(event) {
             event.preventDefault();
@@ -153,13 +162,16 @@
             const { data, error } = await supabaseClient.auth.signInWithPassword({
             email: email,
             password: senha,
+            options: {
+                shouldCreateUser: false
+            }
             });
             
             if (error) {
                 alert('Erro ao fazer login: ' + error.message);
             } else {
                 alert('Login bem-sucedido!');
-                window.location.href = 'CadastroC.html'; // Redireciona para a página do dashboard
+                window.location.href = '/site/homeScreen.html'; // Redireciona para a página do dashboard
             }
         });
     </script>

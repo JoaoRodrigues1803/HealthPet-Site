@@ -53,9 +53,17 @@
      const { createClient } = supabase;
     const _supabase = createClient(
       'https://blcgszqtzogwdwbhgbwq.supabase.co',
-      'sb-publishable_TegOLAB84L10PLHHKNu7EA_qSA0A112'
+      'sb-publishable_TegOLAB84L10PLHHKNu7EA_qSA0A112',
+      {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true
+        }
+      }
     );
-
+      const { data: sessionData, error } = await _supabase.auth.getSession();
+      console.log("Sessão atual:", sessionData);
     // Elementos HTML
     const heartRateElement = document.getElementById('heart-rate-value');
     const mapFrame = document.getElementById('map');
