@@ -212,28 +212,23 @@
     const { createClient } = supabase
     const _supabase = createClient(
       'https://blcgszqtzogwdwbhgbwq.supabase.co',
-      'sb_publishable_TegOLAB84L10PLHHKNu7EA_qSA0A112',
-      {
-          auth: {
-          persistSession: true,
-          autoRefreshToken: true,
-          detectSessionInUrl: true
-          }
-      }
-    )
+      'sb_publishable_TegOLAB84L10PLHHKNu7EA_qSA0A112')
 
+    // ==========================
+    // 🔹 PASSO 1: VERIFICAR LOGIN
+    // ==========================
     const { data: { user }, error: userError } = await _supabase.auth.getUser()
-
     if (userError || !user) {
-      alert("Você precisa estar logado para visualizar o perfil")
-      window.location.href = 'Login.html'
+      alert("Ops! parece que voce fez login!")
+      window.location.href = '/site/Login';
     } else {
       // ✅ Troque 'auth_id' pelo nome correto da coluna na sua tabela 'usuario'
       let { data: usuario, error } = await _supabase
         .from('usuario')
         .select('*')
         .eq('auth_id', user.id) 
-
+      }
+    // ==========================
       if (error) {
         console.error("Erro ao buscar dados do usuário:", error)
       } else if (usuario && usuario.length > 0) {
@@ -246,9 +241,9 @@
       }
 
       let { data: dados_pet, error: petError } = await _supabase
-        .from('dados_pet')
+        .from('pet')
         .select('*')
-        .eq('tutor_id', user.id)
+        .eq('tutor_auth', user.id)
 
       if (!petError && dados_pet.length > 0) {
         const pet = dados_pet[0]
@@ -261,7 +256,7 @@
         document.getElementById('vacinado').textContent = pet.vacinas ? "Sim" : "Não"
         document.getElementById('Vermifugado').textContent = pet.vermifugado ? "Sim" : "Não"
       }
-    }
+      
 
     document.getElementById("div").addEventListener('click', async function (event) {
       console.log("Logout iniciado");
