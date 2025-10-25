@@ -58,7 +58,7 @@
     // ==========================
     const { data: { user }, error: userError } = await _supabase.auth.getUser()
     if (userError || !user) {
-      alert("Ops! parece que voce fez login!")
+      alert("Ops! parece que você não fez login!")
       window.location.href = '/site/Login';
     } else {
       // ✅ Troque 'auth_id' pelo nome correto da coluna na sua tabela 'usuario'
