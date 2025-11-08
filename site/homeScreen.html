@@ -13,8 +13,8 @@
 
   <div class="top-bar">
     <h3>Health Pet</h3>
-    <a href="/site/CadastroC.html">Cadastre seu pet !</a>
   </div>
+
 
   <div class="container">
     <div class="heart-rate-container">
@@ -92,6 +92,7 @@
       .eq('mac_placa', pet[0].mac_placa);
 
     console.log('Dados do Supabase:', data);
+    console.log("mac placa:", pet[0].mac_placa);
 
     if (error) {
       console.error('Erro ao buscar dados:', error);
@@ -144,6 +145,7 @@
   </script>
 
 
+  <a href="/site/CadastroC.html" style="text-decoration: none;">Cadastre seu pet</a>
 
 </body>
 </html>                           
